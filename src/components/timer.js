@@ -1,9 +1,9 @@
 import React from 'react';
 
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
+import duration from 'dayjs/plugin/duration';
 
-dayjs.extend(utc);
+dayjs.extend(duration);
 
 export default class Timer extends React.Component {
   constructor(props) {
@@ -25,18 +25,16 @@ export default class Timer extends React.Component {
     this.audioEl = document.querySelector('#beep');
   }
   parseTime(time) {
-    return dayjs.utc(time * 60 * 1000);
+    return dayjs.duration(time, 'minute');
   }
   start() {
     this.intervalId = setInterval(() => {
       const time = this.state.time;
-      // checking both minute and second equal 0 ended up with
-      // timer displays 59:59 instead of 00:00 so we check second
-      // to equals 1
-      if (time.get('minute') === 0 && time.get('second') === 1) {
+      if (time.minutes() === 0 && time.seconds() === 0) {
         this.stop();
         this.audioEl.play();
         this.props.onFinish();
+        return;
       }
       this.setState({ time: time.subtract(1, 'second') });
     }, 1000);
