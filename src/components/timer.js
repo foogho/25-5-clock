@@ -49,7 +49,7 @@ export default class Timer extends React.Component {
     this.stop();
     this.setState({ time: this.parseTime(this.props.time) });
     this.audioEl.pause();
-    this.currentTime = 0;
+    this.audioEl.currentTime = 0;
   }
   render() {
     const label = this.props.label;

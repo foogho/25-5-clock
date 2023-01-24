@@ -109,7 +109,7 @@ export default class Clock extends React.Component {
           />
         </div>
         <div className="card-footer">
-          <button className="btn btn-primary" onClick={this.onReset}>
+          <button className="btn btn-primary" onClick={this.onReset} id="reset">
             reset
           </button>
         </div>
