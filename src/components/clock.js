@@ -1,27 +1,35 @@
-import React from 'react';
+import React, { createRef } from 'react';
+import Session from './session';
+import Timer from './timer';
 
+const sessions = [
+  {
+    name: 'break',
+    defaultLength: 5,
+    length: 5,
+  },
+  {
+    name: 'session',
+    defaultLength: 25,
+    length: 25,
+  },
+];
 export default class Clock extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      sessions: [
-        {
-          name: 'break',
-          defaultLength: 5,
-          length: 5,
-        },
-        {
-          name: 'session',
-          defaultLength: 25,
-          length: 25,
-        },
-      ],
-    };
+    this.state = this.initializeState();
+    this.timerRef = createRef();
     this.modSessionLength = this.modSessionLength.bind(this);
-    this.initilizeSessionsLength = this.initilizeSessionsLength.bind(this);
+    this.initializeSessionsLength = this.initializeSessionsLength.bind(this);
+    this.onReset = this.onReset.bind(this);
   }
-
-  initilizeSessionsLength() {
+  initializeState() {
+    return {
+      sessions: sessions,
+      activeSessionIdx: 1,
+    };
+  }
+  initializeSessionsLength() {
     this.setState({
       sessions: this.state.sessions.map((session) => ({
         ...session,
@@ -37,6 +45,12 @@ export default class Clock extends React.Component {
     const sessionIdx = sessions.findIndex(
       (value) => value.name === session.name
     );
+    if (type === 'decrement' && session.length - 1 === 0) {
+      return;
+    }
+    if (type === 'increment' && session.length + 1 > 60) {
+      return;
+    }
     return this.setState({
       sessions: [
         ...sessions.slice(0, sessionIdx),
@@ -50,69 +64,54 @@ export default class Clock extends React.Component {
     });
   }
 
+  onReset() {
+    this.setState(this.initializeState());
+    this.timerRef.current.reset();
+  }
+
   render() {
     const sessions = this.state.sessions;
+    const activeSessionIdx = this.state.activeSessionIdx;
+    const activeSession = sessions[activeSessionIdx];
     return (
-      <div className="card mx-auto text-center">
+      <div className="card mx-auto text-center shadow">
         <div className="card-header">
           <div className="row">
-            {sessions.map((session, i) => (
-              <div className="col" key={i}>
-                <div className="row row-cols-1 g-2">
-                  <h3 id={`${session.name}-label`}>{session.name} Length</h3>
-                  <h5 id={`${session.name}-length`}>{session.length}</h5>
-                  <div>
-                    <div className="btn-group btn-group-sm">
-                      <div
-                        id={`${session.name}-increment`}
-                        className="btn btn-secondary"
-                        onClick={() => {
-                          this.modSessionLength(session, 'increment');
-                        }}
-                      >
-                        increment
-                      </div>
-                      <div
-                        id={`${session.name}-decrement`}
-                        className="btn btn-secondary"
-                        onClick={() => {
-                          this.modSessionLength(session, 'decrement');
-                        }}
-                      >
-                        decrement
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            {sessions.map(({ name, length }, i) => (
+              <div className="col p-3" key={i}>
+                <Session
+                  name={name}
+                  length={length}
+                  onEdit={(sessionName, type) => {
+                    this.modSessionLength(
+                      this.state.sessions.find(
+                        (session) => session.name === sessionName
+                      ),
+                      type
+                    );
+                  }}
+                />
               </div>
             ))}
           </div>
         </div>
         <div className="card-body">
-          <h3 id="timer-label" className="mb-4">
-            timer label
-          </h3>
-          <h1 className="display-1" id="time-left">
-            25:00
-          </h1>
+          <Timer
+            label={activeSession.name}
+            time={activeSession.length}
+            onFinish={() => {
+              this.setState({
+                activeSessionIdx: activeSessionIdx === 1 ? 0 : 1,
+              });
+              this.timerRef.current.start();
+            }}
+            ref={this.timerRef}
+          />
         </div>
         <div className="card-footer">
-          <div className="row">
-            <div className="col">
-              <button className="btn btn-primary" id="start_stop">
-                start/stop
-              </button>
-            </div>
-            <div className="col">
-              <button
-                className="btn btn-primary"
-                id="reset"
-                onClick={this.initilizeSessionsLength}
-              >
-                reset
-              </button>
-            </div>
-          </div>
+          <button className="btn btn-primary" onClick={this.onReset}>
+            reset
+          </button>
         </div>
       </div>
     );
