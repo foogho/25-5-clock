@@ -30,7 +30,7 @@ export default class Timer extends React.Component {
   start() {
     this.intervalId = setInterval(() => {
       const time = this.state.time;
-      if (time.minutes() === 0 && time.seconds() === 0) {
+      if (time.asSeconds() === 0) {
         this.stop();
         this.audioEl.play();
         this.props.onFinish();
@@ -59,7 +59,9 @@ export default class Timer extends React.Component {
         </div>
         <div className="col">
           <h1 className="display-1" id="time-left">
-            {time.format('mm:ss')}
+            {time.asMinutes() !== 60
+              ? `${time.format('mm:ss')}`
+              : `${time.asMinutes()}:${time.format('ss')}`}
           </h1>
         </div>
         <div className="col">
