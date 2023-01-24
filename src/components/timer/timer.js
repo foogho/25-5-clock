@@ -2,6 +2,7 @@ import React from 'react';
 
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import timer_beep from './timer-beep.mp3';
 
 dayjs.extend(duration);
 
@@ -75,7 +76,7 @@ export default class Timer extends React.Component {
             start/stop
           </button>
         </div>
-        <audio src="/timer-beep.mp3" id="beep"></audio>
+        <audio src={timer_beep} id="beep"></audio>
       </div>
     );
   }

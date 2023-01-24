@@ -1,6 +1,6 @@
 import React, { createRef } from 'react';
 import Session from './session';
-import Timer from './timer';
+import Timer from './timer/timer';
 
 const sessions = [
   {
